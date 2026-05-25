@@ -41,8 +41,8 @@ const EventsList = () => {
                 filterFn: 'includesString'
             },
             {
-                id: 'event',
-                accessorKey:'event',
+                id: 'direction',
+                accessorKey:'direction.name',
                 size: 150,
                 header: () => <p className="column-title">Направление</p>,
                 cell: ({ getValue }) => <Badge variant="secondary">{getValue<string>()}</Badge>,
