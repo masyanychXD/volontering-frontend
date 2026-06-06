@@ -3,8 +3,17 @@ export type Event = {
     name: string;
     code: string;
     description: string;
-    direction: string;
+    directionID: number;
+    direction: {
+        id: number;
+        code: string;
+        name: string;
+        description: string;
+        createdAt: string;
+        updatedAt: string;
+    };
     createdAt: string;
+    updatedAt: string;
 }
 
 export type ListResponse<T = unknown> = {
