@@ -108,7 +108,7 @@ export type EventDetails = {
     id: number;
     name: string;
     description: string;
-    status: "active" | "inactive";
+    status: "Открыто" | "Закрыто";
     capacity: number;
     courseCode: string;
     courseName: string;

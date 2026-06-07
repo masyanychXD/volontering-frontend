@@ -39,7 +39,11 @@ const UploadWidget = ({ value = null, onChange, disabled = false }: UploadWidget
                 maxFileSize: 5000000,
                 clientAllowedFormats: ['png', 'jpg', 'jpeg', 'webp'],
             }, (error, result) => {
-                if(!error && result.event === 'success') {
+                if (error) {
+                    console.error('Upload error:', error);
+                    return;
+                }
+                if (result.event === 'success') {
                     const payload: UploadWidgetValue = {
                         url: result.info.secure_url,
                         publicId: result.info.public_id,
@@ -69,19 +73,18 @@ const UploadWidget = ({ value = null, onChange, disabled = false }: UploadWidget
 
         setIsRemoving(true);
         try {
-            // Если есть deleteToken, используем его для удаления
             if (deleteToken) {
                 const formData = new FormData();
                 formData.append('public_id', preview.publicId);
                 formData.append('token', deleteToken);
-
-                await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/delete_by_token`, {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/delete_by_token`, {
                     method: 'POST',
                     body: formData,
                 });
+                if (!response.ok) {
+                    throw new Error(`Delete failed: ${response.status}`);
+                }
             }
-
-            // Очищаем состояние
             setPreview(null);
             setDeleteToken(null);
             onChangeRef.current?.(null);

@@ -19,7 +19,7 @@ export const subjectSchema = z.object({
         .min(5, "Описание мероприятия должно быть не менее 5 символов"),
     direction: z
         .string()
-        .min(2, "Направление мероприятия должно быть не менее 2 симполов"),
+        .min(2, "Направление мероприятия должно быть не менее 2 сивполов"),
 });
 
 const scheduleSchema = z.object({
@@ -59,16 +59,6 @@ export const sessionSchema = z.object({
         .string({ required_error: "ID баннера обязателен" })
         .min(1, "ID баннера обязателен"),
     schedules: z.array(scheduleSchema).optional(),
-});
-
-export const enrollmentSchema = z.object({
-    classId: z.coerce
-        .number({
-            required_error: "Class ID is required",
-            invalid_type_error: "Class ID is required",
-        })
-        .min(1, "Class ID is required"),
-    studentId: z.string().min(1, "Student ID is required"),
 });
 
 export const registrationSchema = z.object({

@@ -123,9 +123,9 @@ const Create = () => {
                                             <FormLabel>Картинка <span className="text-orange-600">*</span></FormLabel>
                                             <FormControl>
                                                 <UploadWidget
-                                                    value={field.value ? {
+                                                    value={field.value && bannerPublicId ? {
                                                         url: field.value,
-                                                        publicId: bannerPublicId ?? ''
+                                                        publicId: bannerPublicId
                                                     } : null}
                                                     onChange={(file) => {
                                                         if (file) {
