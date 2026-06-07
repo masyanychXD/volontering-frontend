@@ -13,10 +13,12 @@ import { useNotificationProvider } from "./components/refine-ui/notification/use
 import { ThemeProvider } from "./components/refine-ui/theme/theme-provider";
 import { dataProvider } from "./providers/data";
 import Dashboard from "@/pages/dashboard.tsx";
-import {BookOpen, Home} from "lucide-react";
+import {BookOpen, GraduationCap, Home} from "lucide-react";
 import {Layout} from "@/components/refine-ui/layout/layout.tsx";
 import EventsList from "@/pages/events/list.tsx";
 import EventsCreate from "@/pages/events/create.tsx";
+import SessionsList from "@/pages/sessions/list.tsx";
+import SessionsCreate from "@/pages/sessions/create.tsx";
 
 function App() {
   return (
@@ -45,6 +47,12 @@ function App() {
                       list: '/events',
                       create: '/events/create',
                       meta: {label: 'Мероприятия', icon: <BookOpen />}
+                  },
+                  {
+                      name: 'sessions',
+                      list: '/sessions',
+                      create: '/sessions/create',
+                      meta: {label: 'Событие', icon: <GraduationCap />}
                   }
               ]}
             >
@@ -58,6 +66,11 @@ function App() {
                       <Route path="events">
                           <Route index element={<EventsList />} />
                           <Route path="create" element={<EventsCreate />} />
+                      </Route>
+
+                      <Route path="sessions">
+                          <Route index element={<SessionsList />} />
+                          <Route path="create" element={<SessionsCreate />} />
                       </Route>
                   </Route>
               </Routes>
