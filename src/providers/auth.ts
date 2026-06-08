@@ -1,7 +1,6 @@
 import type { AuthProvider } from "@refinedev/core";
 import { User, SignUpPayload } from "@/types";
 import { authClient } from "@/lib/auth-client";
-import { BACKEND_BASE_URL } from "@/constants";
 
 export const authProvider: AuthProvider = {
     register: async ({

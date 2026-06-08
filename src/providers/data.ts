@@ -1,5 +1,4 @@
 import { createDataProvider, CreateDataProviderOptions } from "@refinedev/rest";
-import { BACKEND_BASE_URL } from "@/constants";
 import { CreateResponse, GetOneResponse, ListResponse, UpdateResponse } from "@/types";
 import { HttpError } from "@refinedev/core";
 
@@ -119,6 +118,6 @@ const options: CreateDataProviderOptions = {
   },
 };
 
-const { dataProvider } = createDataProvider(BACKEND_BASE_URL, options);
+const { dataProvider } = createDataProvider("/api", options);
 
 export { dataProvider };
