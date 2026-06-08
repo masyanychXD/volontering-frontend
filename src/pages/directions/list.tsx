@@ -3,41 +3,46 @@ import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useTable } from "@refinedev/react-table";
 
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ListView } from "@/components/refine-ui/views/list-view";
-import { CreateButton } from "@/components/refine-ui/buttons/create";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { DataTable } from "@/components/refine-ui/data-table/data-table";
 import { ShowButton } from "@/components/refine-ui/buttons/show";
+import { CreateButton } from "@/components/refine-ui/buttons/create";
 
-import { Event } from "@/types";
-import { DIRECTIONS_OPTIONS } from "@/constants";
+type DirectionListItem = {
+    id: number;
+    name: string;
+    code?: string | null;
+    description?: string | null;
+    totalEvents?: number | null;
+};
 
-const EventsList = () => {
+const DirectionsList = () => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedDirection, setSelectedDirection] = useState<string>("all");
 
-    const eventColumns = useMemo<ColumnDef<Event>[]>(
+    const directionColumns = useMemo<ColumnDef<DirectionListItem>[]>(
         () => [
             {
                 id: "code",
                 accessorKey: "code",
-                size: 100,
+                size: 120,
                 header: () => <p className="column-title ml-2">Код</p>,
-                cell: ({ getValue }) => <Badge>{getValue<string>()}</Badge>,
+                cell: ({ getValue }) => {
+                    const code = getValue<string>();
+
+                    return code ? (
+                        <Badge>{code}</Badge>
+                    ) : (
+                        <span className="text-muted-foreground ml-2">Нет кода</span>
+                    );
+                },
             },
             {
                 id: "name",
                 accessorKey: "name",
-                size: 200,
+                size: 220,
                 header: () => <p className="column-title">Название</p>,
                 cell: ({ getValue }) => (
                     <span className="text-foreground">{getValue<string>()}</span>
@@ -45,22 +50,29 @@ const EventsList = () => {
                 filterFn: "includesString",
             },
             {
-                id: "direction",
-                accessorKey: "direction.name",
-                size: 150,
-                header: () => <p className="column-title">Направление</p>,
-                cell: ({ getValue }) => (
-                    <Badge variant="secondary">{getValue<string>()}</Badge>
-                ),
+                id: "totalEvents",
+                accessorKey: "totalEvents",
+                size: 160,
+                header: () => <p className="column-title">Мероприятия</p>,
+                cell: ({ getValue }) => {
+                    const total = getValue<number>();
+                    return <Badge variant="secondary">{total ?? 0}</Badge>;
+                },
             },
             {
                 id: "description",
                 accessorKey: "description",
-                size: 300,
+                size: 320,
                 header: () => <p className="column-title">Описание</p>,
-                cell: ({ getValue }) => (
-                    <span className="truncate line-clamp-2">{getValue<string>()}</span>
-                ),
+                cell: ({ getValue }) => {
+                    const description = getValue<string>();
+
+                    return description ? (
+                        <span className="truncate line-clamp-2">{description}</span>
+                    ) : (
+                        <span className="text-muted-foreground">Нет описания</span>
+                    );
+                },
             },
             {
                 id: "details",
@@ -68,7 +80,7 @@ const EventsList = () => {
                 header: () => <p className="column-title">Детали</p>,
                 cell: ({ row }) => (
                     <ShowButton
-                        resource="events"
+                        resource="directions"
                         recordItemId={row.original.id}
                         variant="outline"
                         size="sm"
@@ -81,17 +93,6 @@ const EventsList = () => {
         []
     );
 
-    const directionFilters =
-        selectedDirection === "all"
-            ? []
-            : [
-                {
-                    field: "direction",
-                    operator: "eq" as const,
-                    value: selectedDirection,
-                },
-            ];
-
     const searchFilters = searchQuery
         ? [
             {
@@ -99,19 +100,24 @@ const EventsList = () => {
                 operator: "contains" as const,
                 value: searchQuery,
             },
+            {
+                field: "code",
+                operator: "contains" as const,
+                value: searchQuery,
+            },
         ]
         : [];
 
-    const eventTable = useTable<Event>({
-        columns: eventColumns,
+    const directionsTable = useTable<DirectionListItem>({
+        columns: directionColumns,
         refineCoreProps: {
-            resource: "events",
+            resource: "directions",
             pagination: {
                 pageSize: 10,
                 mode: "server",
             },
             filters: {
-                permanent: [...directionFilters, ...searchFilters],
+                permanent: [...searchFilters],
             },
             sorters: {
                 initial: [
@@ -127,50 +133,29 @@ const EventsList = () => {
     return (
         <ListView>
             <Breadcrumb />
-            <h1 className="page-title">Мероприятия</h1>
+            <h1 className="page-title">Направления</h1>
 
             <div className="intro-row">
-                <p>Быстрый доступ ко всем мероприятиям и событиям.</p>
+                <p>Быстрый доступ к направлениям волонтерской деятельности.</p>
 
                 <div className="actions-row">
                     <div className="search-field">
                         <Search className="search-icon" />
                         <Input
                             type="text"
-                            placeholder="Поиск по названию..."
+                            placeholder="Поиск по названию или коду..."
                             className="pl-10 w-full"
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
                         />
                     </div>
-
-                    <div className="flex gap-2 w-full sm:w-auto">
-                        <Select
-                            value={selectedDirection}
-                            onValueChange={setSelectedDirection}
-                        >
-                            <SelectTrigger className="">
-                                <SelectValue placeholder="Фильтр по направлению" />
-                            </SelectTrigger>
-
-                            <SelectContent>
-                                <SelectItem value="all">Все направления</SelectItem>
-                                {DIRECTIONS_OPTIONS.map((direction) => (
-                                    <SelectItem key={direction.value} value={direction.value}>
-                                        {direction.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-
-                        <CreateButton resource="events" />
-                    </div>
+                    <CreateButton resource="directions" />
                 </div>
             </div>
 
-            <DataTable table={eventTable} />
+            <DataTable table={directionsTable} />
         </ListView>
     );
 };
 
-export default EventsList;
+export default DirectionsList;
