@@ -13,7 +13,6 @@ import {
 } from "@/components/refine-ui/views/show-view";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { bannerPhoto } from "@/lib/cloudinary";
@@ -203,21 +202,6 @@ const SessionsShow = () => {
                         <p>{sessionDetails?.event?.description}</p>
                     </div>
                 </div>
-
-                <Separator />
-
-                <div className="join">
-                    <h2>🎯 Записаться на сессию</h2>
-                    <ol>
-                        <li>Попросите код приглашения у координатора.</li>
-                        <li>Нажмите на кнопку &quot;Записаться&quot;.</li>
-                        <li>Вставьте код и нажмите &quot;Присоединиться&quot;.</li>
-                    </ol>
-                </div>
-
-                <Button size="lg" className="w-full">
-                    Записаться
-                </Button>
             </Card>
 
             <Card className="hover:shadow-md transition-shadow">
