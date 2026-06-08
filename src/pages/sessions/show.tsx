@@ -60,21 +60,6 @@ const SessionsShow = () => {
                     </div>
                 ),
             },
-            {
-                id: "details",
-                size: 140,
-                header: () => <p className="column-title">Детали</p>,
-                cell: ({ row }) => (
-                    <ShowButton
-                        resource="users"
-                        recordItemId={row.original.id}
-                        variant="outline"
-                        size="sm"
-                    >
-                        Смотреть
-                    </ShowButton>
-                ),
-            },
         ],
         []
     );
