@@ -2,7 +2,7 @@ import { createAuthClient } from "better-auth/react";
 import { USER_ROLES } from "../constants";
 
 export const authClient = createAuthClient({
-    baseURL: "/api/auth",
+    baseURL: `${window.location.origin}/api/auth`,
     session: {
         storage: "localStorage",
     },
