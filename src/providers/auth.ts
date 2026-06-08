@@ -1,6 +1,7 @@
 import type { AuthProvider } from "@refinedev/core";
 import { User, SignUpPayload } from "@/types";
 import { authClient } from "@/lib/auth-client";
+import { BACKEND_BASE_URL } from "@/constants";
 
 export const authProvider: AuthProvider = {
     register: async ({
@@ -26,13 +27,10 @@ export const authProvider: AuthProvider = {
                     success: false,
                     error: {
                         name: "Ошибка регистрации",
-                        message:
-                            error?.message || "Не удалось создать аккаунт. Попробуйте снова.",
+                        message: error?.message || "Не удалось создать аккаунт.",
                     },
                 };
             }
-
-            localStorage.setItem("user", JSON.stringify(data.user));
 
             return {
                 success: true,
@@ -44,7 +42,7 @@ export const authProvider: AuthProvider = {
                 success: false,
                 error: {
                     name: "Ошибка регистрации",
-                    message: "Не удалось создать аккаунт. Попробуйте снова.",
+                    message: "Не удалось создать аккаунт.",
                 },
             };
         }
@@ -52,12 +50,11 @@ export const authProvider: AuthProvider = {
     login: async ({ email, password }) => {
         try {
             const { data, error } = await authClient.signIn.email({
-                email: email,
-                password: password,
+                email,
+                password,
             });
 
             if (error) {
-                console.error("Login error from auth client:", error);
                 return {
                     success: false,
                     error: {
@@ -67,9 +64,6 @@ export const authProvider: AuthProvider = {
                 };
             }
 
-            localStorage.setItem("user", JSON.stringify(data.user));
-
-            // Принудительно перезагружаем страницу для обновления роли
             setTimeout(() => {
                 window.location.href = "/profile";
             }, 50);
@@ -79,7 +73,6 @@ export const authProvider: AuthProvider = {
                 redirectTo: "/profile",
             };
         } catch (error) {
-            console.error("Login exception:", error);
             return {
                 success: false,
                 error: {
@@ -93,17 +86,14 @@ export const authProvider: AuthProvider = {
         const { error } = await authClient.signOut();
 
         if (error) {
-            console.error("Logout error:", error);
             return {
                 success: false,
                 error: {
                     name: "Ошибка выхода",
-                    message: "Не удалось выйти. Попробуйте снова.",
+                    message: "Не удалось выйти.",
                 },
             };
         }
-
-        localStorage.removeItem("user");
 
         return {
             success: true,
@@ -112,55 +102,59 @@ export const authProvider: AuthProvider = {
     },
     onError: async (error) => {
         if (error.response?.status === 401) {
-            return {
-                logout: true,
-            };
+            return { logout: true };
         }
-
         return { error };
     },
     check: async () => {
-        const user = localStorage.getItem("user");
+        try {
+            const { data } = await authClient.getSession();
 
-        if (user) {
+            if (data?.user) {
+                // Кэшируем в localStorage для быстрого доступа
+                const userData = {
+                    id: data.user.id,
+                    name: data.user.name,
+                    email: data.user.email,
+                    role: (data.user as any).role,
+                    image: (data.user as any).image,
+                    imageCldPubId: (data.user as any).imageCldPubId,
+                };
+                localStorage.setItem("user", JSON.stringify(userData));
+                return { authenticated: true };
+            }
+
+            localStorage.removeItem("user");
             return {
-                authenticated: true,
+                authenticated: false,
+                logout: true,
+                redirectTo: "/login",
+            };
+        } catch {
+            localStorage.removeItem("user");
+            return {
+                authenticated: false,
+                logout: true,
+                redirectTo: "/login",
             };
         }
-
-        return {
-            authenticated: false,
-            logout: true,
-            redirectTo: "/login",
-            error: {
-                name: "Не авторизован",
-                message: "Проверка не пройдена",
-            },
-        };
     },
     getPermissions: async () => {
-        const user = localStorage.getItem("user");
-
-        if (!user) return null;
-        const parsedUser: User = JSON.parse(user);
-
-        return {
-            role: parsedUser.role,
-        };
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return null;
+        return { role: JSON.parse(userStr).role };
     },
     getIdentity: async () => {
-        const user = localStorage.getItem("user");
-
-        if (!user) return null;
-        const parsedUser: User = JSON.parse(user);
-
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return null;
+        const user = JSON.parse(userStr);
         return {
-            id: parsedUser.id,
-            name: parsedUser.name,
-            email: parsedUser.email,
-            image: parsedUser.image,
-            role: parsedUser.role,
-            imageCldPubId: parsedUser.imageCldPubId,
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            image: user.image,
+            role: user.role,
+            imageCldPubId: user.imageCldPubId,
         };
     },
 };

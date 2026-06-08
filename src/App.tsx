@@ -53,13 +53,12 @@ import ProfileShow from "./pages/profile/show";
 import ProfileEdit from "./pages/profile/edit";
 
 function App() {
+    // Роль из localStorage (обновляется через authProvider.check с сервера)
     const getRole = (): "admin" | "coordinator" | "student" | null => {
         try {
             const userStr = localStorage.getItem("user");
             if (!userStr) return null;
-            const user = JSON.parse(userStr);
-            console.log("🔑 Текущая роль:", user.role);
-            return user.role ?? null;
+            return JSON.parse(userStr).role ?? null;
         } catch {
             return null;
         }
@@ -82,7 +81,7 @@ function App() {
                                 warnWhenUnsavedChanges: true,
                                 projectId: "IRFv3l-86ON1N-tH0v1d",
                                 title: {
-                                    text: "ДоброЦентр РГПУ",
+                                    text: "ДоброЦентр",
                                     icon: (
                                         <img
                                             src="/logo.png"
