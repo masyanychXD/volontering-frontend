@@ -3,6 +3,9 @@ import { BACKEND_BASE_URL, USER_ROLES } from "../constants";
 
 export const authClient = createAuthClient({
     baseURL: `${BACKEND_BASE_URL}/api/auth`,
+    session: {
+        storage: "localStorage",
+    },
     user: {
         additionalFields: {
             role: {
