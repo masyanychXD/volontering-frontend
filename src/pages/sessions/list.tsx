@@ -35,6 +35,16 @@ type SessionListItem = {
     capacity: number;
 };
 
+const getRole = (): string | null => {
+    try {
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return null;
+        return JSON.parse(userStr).role ?? null;
+    } catch {
+        return null;
+    }
+};
+
 const SessionsList = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedEvent, setSelectedEvent] = useState<string>("all");
@@ -266,7 +276,7 @@ const SessionsList = () => {
                             </SelectContent>
                         </Select>
 
-                        <CreateButton resource="sessions" />
+                        {getRole() !== "student" && <CreateButton resource="sessions" />}
                     </div>
                 </div>
             </div>
