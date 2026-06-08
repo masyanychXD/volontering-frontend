@@ -1,104 +1,104 @@
-import {CreateView} from "@/components/refine-ui/views/create-view.tsx";
-import {Breadcrumb} from "@/components/refine-ui/layout/breadcrumb.tsx";
-import {Button} from "@/components/ui/button.tsx";
-import {useBack} from "@refinedev/core";
-import {Separator} from "@/components/ui/separator.tsx";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "@refinedev/react-hook-form";
-import {sessionSchema} from "@/lib/schema.ts";
-import * as z  from "zod";
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form.tsx";
-import { Input } from "@/components/ui/input";
-import {Label} from "@/components/ui/label.tsx";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
-import {Textarea} from "@/components/ui/textarea.tsx";
-import {Loader2} from "lucide-react";
-import UploadWidget from "@/components/upload-widget.tsx";
+} from "@/components/ui/form";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
-const Create = () => {
+import { CreateView } from "@/components/refine-ui/views/create-view";
+import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
+
+import { Textarea } from "@/components/ui/textarea";
+import { useBack, useList } from "@refinedev/core";
+import { Loader2 } from "lucide-react";
+import { sessionSchema } from "@/lib/schema";
+import UploadWidget from "@/components/upload-widget";
+import { Event, User } from "@/types";
+import z from "zod";
+
+const SessionsCreate = () => {
     const back = useBack();
 
     const form = useForm({
         resolver: zodResolver(sessionSchema),
         refineCoreProps: {
-            resource: 'sessions',
-            action: 'create',
-        }
+            resource: "sessions",
+            action: "create",
+        },
+        defaultValues: {
+            status: "Открыто",
+        },
     });
 
     const {
+        refineCore: { onFinish },
         handleSubmit,
-        formState: {isSubmitting, errors},
+        formState: { isSubmitting, errors },
         control,
     } = form;
 
-    const onSubmit = (values: z.infer<typeof sessionSchema>)=> {
+    const bannerPublicId = form.watch("bannerCldPubId");
+
+    const onSubmit = async (values: z.infer<typeof sessionSchema>) => {
         try {
-            console.log(values);
-        } catch (e) {
-            console.log('error creating new session',e);
+            await onFinish(values);
+        } catch (error) {
+            console.error("Ошибка создания сессии:", error);
         }
-    }
+    };
 
-    const Assistants = [
-        {
-            id: "1",
-            name: "Юлия Пябус",
+    // Fetch events list
+    const { query: eventsQuery } = useList<Event>({
+        resource: "events",
+        pagination: {
+            pageSize: 100,
         },
-        {
-            id: "2",
-            name: "Елизавета Козлова",
-        },
-        {
-            id: "3",
-            name: "Артем Федоров",
-        },
-    ];
+    });
 
-    const directions = [
-        {
-            id: 1,
-            name: "Cобытийное",
-            code: "СОБ",
+    // Fetch coordinators list
+    const { query: coordinatorsQuery } = useList<User>({
+        resource: "users",
+        filters: [
+            {
+                field: "role",
+                operator: "eq",
+                value: "coordinator",
+            },
+        ],
+        pagination: {
+            pageSize: 100,
         },
-        {
-            id: 2,
-            name: "Патриотическое",
-            code: "ПАТ",
-        },
-        {
-            id: 3,
-            name: "Экологическое",
-            code: "ЭКО",
-        },
-        {
-            id: 4,
-            name: "Социальное",
-            code: "СОЦ",
-        },
-    ];
+    });
 
-    const bannerPublicId = form.watch('bannerCldPubId');
+    const coordinators = coordinatorsQuery.data?.data || [];
+    const coordinatorsLoading = coordinatorsQuery.isLoading;
+
+    const events = eventsQuery.data?.data || [];
+    const eventsLoading = eventsQuery.isLoading;
 
     return (
-        <CreateView className='class-view'>
+        <CreateView className="class-view">
             <Breadcrumb />
 
-            <h1 className="page-title">Создать Событие</h1>
-
+            <h1 className="page-title">Создать сессию</h1>
             <div className="intro-row">
-                <p>Укажите необходимую информацию ниже, чтобы создать волонтерскую сессию.</p>
-                <Button onClick={back}>Назад</Button>
+                <p>Укажите необходимую информацию для создания волонтерской сессии.</p>
+                <Button onClick={() => back()}>Назад</Button>
             </div>
 
             <Separator />
@@ -106,37 +106,44 @@ const Create = () => {
             <div className="my-4 flex items-center">
                 <Card className="class-form-card">
                     <CardHeader className="relative z-10">
-                        <CardTitle className="text-2xl pb-0 font-bold">Заполните данную форму</CardTitle>
+                        <CardTitle className="text-2xl pb-0 font-bold text-gradient-orange">
+                            Заполните форму
+                        </CardTitle>
                     </CardHeader>
 
                     <Separator />
 
                     <CardContent className="mt-7">
                         <Form {...form}>
-                            <form onSubmit={handleSubmit(onSubmit)}
-                                  className="space-y-5">
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                                 <FormField
                                     control={control}
                                     name="bannerUrl"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Картинка <span className="text-orange-600">*</span></FormLabel>
+                                            <FormLabel>
+                                                Баннер <span className="text-orange-600">*</span>
+                                            </FormLabel>
                                             <FormControl>
                                                 <UploadWidget
-                                                    value={field.value && bannerPublicId ? {
-                                                        url: field.value,
-                                                        publicId: bannerPublicId
-                                                    } : null}
+                                                    value={
+                                                        field.value
+                                                            ? {
+                                                                url: field.value,
+                                                                publicId: bannerPublicId ?? "",
+                                                            }
+                                                            : null
+                                                    }
                                                     onChange={(file) => {
                                                         if (file) {
                                                             field.onChange(file.url);
-                                                            form.setValue('bannerCldPubId', file.publicId, {
+                                                            form.setValue("bannerCldPubId", file.publicId, {
                                                                 shouldValidate: true,
                                                                 shouldDirty: true,
                                                             });
                                                         } else {
-                                                            field.onChange('');
-                                                            form.setValue('bannerCldPubId', '', {
+                                                            field.onChange("");
+                                                            form.setValue("bannerCldPubId", "", {
                                                                 shouldValidate: true,
                                                                 shouldDirty: true,
                                                             });
@@ -146,20 +153,27 @@ const Create = () => {
                                             </FormControl>
                                             <FormMessage />
                                             {errors.bannerCldPubId && !errors.bannerUrl && (
-                                                <p className="text-destructive">{errors.bannerCldPubId.message?.toString()}</p>
+                                                <p className="text-destructive text-sm">
+                                                    {errors.bannerCldPubId.message?.toString()}
+                                                </p>
                                             )}
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={control}
-                                    name="title"
+                                    name="name"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Название Мероприятия <span className="text-orange-600">*</span></FormLabel>
+                                            <FormLabel>
+                                                Название сессии <span className="text-orange-600">*</span>
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Мероприятие в РГПУ им. А. И. Герцена"
-                                                       {...field} />
+                                                <Input
+                                                    placeholder="Утренняя смена - Субботник в парке"
+                                                    {...field}
+                                                />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -172,21 +186,30 @@ const Create = () => {
                                         name="eventId"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Направление <span className="text-orange-600">*</span></FormLabel>
-                                                <Select onValueChange={(value) => field.onChange(Number(value))} value={field?.value?.toString()}>
+                                                <FormLabel>
+                                                    Мероприятие <span className="text-orange-600">*</span>
+                                                </FormLabel>
+                                                <Select
+                                                    onValueChange={(value) =>
+                                                        field.onChange(Number(value))
+                                                    }
+                                                    value={field.value?.toString()}
+                                                    disabled={eventsLoading}
+                                                >
                                                     <FormControl>
                                                         <SelectTrigger className="w-full">
-                                                            <SelectValue placeholder="Выбирите Направление"/>
+                                                            <SelectValue placeholder="Выберите мероприятие" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        {directions.map(
-                                                            (direction) => (
-                                                                <SelectItem value={direction.id.toString()} key={direction.id}>
-                                                                    {direction.name} ({direction.code})
-                                                                </SelectItem>
-                                                            )
-                                                        )}
+                                                        {events.map((event) => (
+                                                            <SelectItem
+                                                                key={event.id}
+                                                                value={event.id.toString()}
+                                                            >
+                                                                {event.name} ({event.code})
+                                                            </SelectItem>
+                                                        ))}
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />
@@ -199,21 +222,28 @@ const Create = () => {
                                         name="coordinatorId"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Координатор <span className="text-orange-600">*</span></FormLabel>
-                                                <Select onValueChange={field.onChange} value={field.value}>
+                                                <FormLabel>
+                                                    Координатор <span className="text-orange-600">*</span>
+                                                </FormLabel>
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    value={field.value}
+                                                    disabled={coordinatorsLoading}
+                                                >
                                                     <FormControl>
                                                         <SelectTrigger className="w-full">
-                                                            <SelectValue placeholder="Выбирите Координатора"/>
+                                                            <SelectValue placeholder="Выберите координатора" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
-                                                        {Assistants.map(
-                                                            (assistant) => (
-                                                                <SelectItem value={assistant.id.toString()} key={assistant.id}>
-                                                                    {assistant.name}
-                                                                </SelectItem>
-                                                            )
-                                                        )}
+                                                        {coordinators.map((coordinator) => (
+                                                            <SelectItem
+                                                                key={coordinator.id}
+                                                                value={coordinator.id}
+                                                            >
+                                                                {coordinator.name}
+                                                            </SelectItem>
+                                                        ))}
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />
@@ -228,14 +258,22 @@ const Create = () => {
                                         name="capacity"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Количество Мест</FormLabel>
+                                                <FormLabel>
+                                                    Количество мест <span className="text-orange-600">*</span>
+                                                </FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="number"
-                                                        placeholder="10"
-                                                        {...field}
-                                                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-                                                        value={field.value ?? ""}
+                                                        min={1}
+                                                        placeholder="30"
+                                                        onChange={(e) => {
+                                                            const value = e.target.value;
+                                                            field.onChange(value ? Number(value) : undefined);
+                                                        }}
+                                                        value={(field.value as number | undefined) ?? ""}
+                                                        name={field.name}
+                                                        ref={field.ref}
+                                                        onBlur={field.onBlur}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -248,18 +286,21 @@ const Create = () => {
                                         name="status"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Статус <span className="text-orange-600">*</span></FormLabel>
-                                                <Select onValueChange={field.onChange} value={field.value}>
+                                                <FormLabel>
+                                                    Статус <span className="text-orange-600">*</span>
+                                                </FormLabel>
+                                                <Select
+                                                    onValueChange={field.onChange}
+                                                    value={field.value}
+                                                >
                                                     <FormControl>
                                                         <SelectTrigger className="w-full">
-                                                            <SelectValue placeholder="Выбирите Статус"/>
+                                                            <SelectValue placeholder="Выберите статус" />
                                                         </SelectTrigger>
                                                     </FormControl>
                                                     <SelectContent>
                                                         <SelectItem value="Открыто">Открыта</SelectItem>
-
                                                         <SelectItem value="Закрыто">Закрыта</SelectItem>
-
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />
@@ -273,10 +314,12 @@ const Create = () => {
                                     name="description"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Описание</FormLabel>
+                                            <FormLabel>
+                                                Описание <span className="text-orange-600">*</span>
+                                            </FormLabel>
                                             <FormControl>
                                                 <Textarea
-                                                    placeholder="Краткое описание мероприятия"
+                                                    placeholder="Краткое описание сессии"
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -290,11 +333,11 @@ const Create = () => {
                                 <Button type="submit" size="lg" className="w-full">
                                     {isSubmitting ? (
                                         <div className="flex gap-1">
-                                            <span>Создание Сессии...</span>
+                                            <span>Создание сессии...</span>
                                             <Loader2 className="inline-block ml-2 animate-spin" />
                                         </div>
                                     ) : (
-                                        "Создать Сессию"
+                                        "Создать сессию"
                                     )}
                                 </Button>
                             </form>
@@ -302,8 +345,8 @@ const Create = () => {
                     </CardContent>
                 </Card>
             </div>
-
         </CreateView>
-    )
-}
-export default Create
+    );
+};
+
+export default SessionsCreate;

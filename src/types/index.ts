@@ -3,8 +3,8 @@ export type Event = {
     name: string;
     code: string;
     description: string;
-    directionID: number;
-    direction: {
+    directionId: number;
+    direction?: {
         id: number;
         code: string;
         name: string;
@@ -76,7 +76,7 @@ export interface UploadWidgetProps {
 
 export enum UserRole {
     STUDENT = "student",
-    ASSISTANT = "assistant",
+    COORDINATOR = "coordinator",
     ADMIN = "admin",
 }
 
@@ -89,7 +89,6 @@ export type User = {
     role: UserRole;
     image?: string;
     imageCldPubId?: string;
-    department?: string;
 };
 
 export type Schedule = {
@@ -104,18 +103,16 @@ export type Direction = {
     description: string;
 };
 
-export type EventDetails = {
+export type SessionDetails = {
     id: number;
     name: string;
     description: string;
     status: "Открыто" | "Закрыто";
     capacity: number;
-    courseCode: string;
-    courseName: string;
     bannerUrl?: string;
     bannerCldPubId?: string;
     event?: Event;
-    assistant?: User;
+    coordinator?: User;
     direction?: Direction;
     schedules: Schedule[];
     inviteCode?: string;
@@ -128,4 +125,8 @@ export type SignUpPayload = {
     image?: string;
     imageCldPubId?: string;
     role: UserRole;
+};
+
+export type UpdateResponse<T = unknown> = {
+    data?: T;
 };

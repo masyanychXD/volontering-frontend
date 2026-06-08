@@ -2,24 +2,26 @@ import * as z from "zod";
 
 export const facultySchema = z.object({
     name: z.string().min(2, 'Имя должно быть как минимум из 2 символов'),
-    emails: z.string().email('Неверный email адрес'),
-    role: z.enum(["admin", "assistant", "student"], {
+    email: z.string().email('Неверный email адрес'),
+    role: z.enum(["admin", "coordinator", "student"], {
         required_error: "Пожалуйста выберите роль",
     }),
-    direction: z.string(),
     image: z.string().optional(),
     imageCldPubId: z.string().optional(),
-})
+});
 
-export const subjectSchema = z.object({
+export const eventSchema = z.object({
     name: z.string().min(3, "Название мероприятия должно быть не менее 3 символов"),
-    code: z.string().min(5, "Код должен быть не менее 5 символов"),
+    code: z.string().min(3, "Код должен быть не менее 3 символов"),
     description: z
         .string()
         .min(5, "Описание мероприятия должно быть не менее 5 символов"),
-    direction: z
-        .string()
-        .min(2, "Направление мероприятия должно быть не менее 2 сивполов"),
+    directionId: z.coerce
+        .number({
+            required_error: "Направление обязательно",
+            invalid_type_error: "Направление обязательно",
+        })
+        .min(1, "Направление обязательно"),
 });
 
 const scheduleSchema = z.object({
@@ -29,7 +31,7 @@ const scheduleSchema = z.object({
 });
 
 export const sessionSchema = z.object({
-    title: z
+    name: z
         .string()
         .min(2, "Название сессии должно быть не менее 2 символов")
         .max(50, "Название сессии должно быть не более 50 символов"),
@@ -61,12 +63,12 @@ export const sessionSchema = z.object({
     schedules: z.array(scheduleSchema).optional(),
 });
 
-export const registrationSchema = z.object({
+export const enrollmentSchema = z.object({
     sessionId: z.coerce
         .number({
             required_error: "ID сессии обязателен",
             invalid_type_error: "ID сессии обязателен",
         })
         .min(1, "ID сессии обязателен"),
-    studentId: z.string().min(1, "ID волонтера обязателен"),
+    volunteerId: z.string().min(1, "ID волонтера обязателен"),
 });
