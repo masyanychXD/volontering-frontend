@@ -276,7 +276,7 @@ const SessionsList = () => {
                             </SelectContent>
                         </Select>
 
-                        {getRole() !== "student" && <CreateButton resource="sessions" />}
+                        {getRole() !== "student" && <CreateButton resource="sessions">+ Создать</CreateButton>}
                     </div>
                 </div>
             </div>

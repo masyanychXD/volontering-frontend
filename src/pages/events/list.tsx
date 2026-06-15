@@ -163,7 +163,7 @@ const EventsList = () => {
                             </SelectContent>
                         </Select>
 
-                        <CreateButton resource="events" />
+                        <CreateButton resource="events">+ Создать</CreateButton>
                     </div>
                 </div>
             </div>
