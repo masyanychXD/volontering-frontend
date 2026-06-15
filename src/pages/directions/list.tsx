@@ -149,7 +149,7 @@ const DirectionsList = () => {
                             onChange={(event) => setSearchQuery(event.target.value)}
                         />
                     </div>
-                    <CreateButton resource="directions" />
+                    <CreateButton resource="directions">+ Создать</CreateButton>
                 </div>
             </div>
 
