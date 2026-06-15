@@ -3,7 +3,6 @@ import { DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 
 import routerProvider, {
-    DocumentTitleHandler,
     NavigateToResource,
     UnsavedChangesNotifier,
 } from "@refinedev/react-router";
@@ -242,7 +241,7 @@ function App() {
                             <Toaster />
                             <RefineKbar />
                             <UnsavedChangesNotifier />
-                            <DocumentTitleHandler />
+
                         </Refine>
                     </DevtoolsProvider>
                 </ThemeProvider>
