@@ -20,6 +20,16 @@ import EventsCreate from "@/pages/events/create.tsx";
 import SessionsList from "@/pages/sessions/list.tsx";
 import SessionsCreate from "@/pages/sessions/create.tsx";
 
+/**
+ * Render the root application shell: providers, Refine initialization, routing, and global UI components.
+ *
+ * Initializes BrowserRouter and application providers (theme, kbar, devtools), configures Refine
+ * (data, notifications, router, options, and resources for Dashboard, events, and sessions),
+ * declares application routes and layouts, and mounts global components such as the toaster,
+ * command palette, unsaved-changes notifier, document title handler, and devtools panel.
+ *
+ * @returns The root React element for the application shell
+ */
 function App() {
   return (
     <BrowserRouter>
